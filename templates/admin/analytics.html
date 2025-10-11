@@ -1,0 +1,895 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar d-none d-md-block">
+        <div class="nav flex-column">
+            <a class="nav-link" href="{{ url_for('main.admin_dashboard') }}">
+                <i class="bi bi-speedometer2 me-2"></i>Дашборд
+            </a>
+            <a class="nav-link" href="{{ url_for('main.admin_tickets') }}">
+                <i class="bi bi-list-check me-2"></i>Обращения
+            </a>
+            <a class="nav-link active" href="{{ url_for('main.admin_analytics') }}">
+                <i class="bi bi-bar-chart me-2"></i>Аналитика
+            </a>
+            <a class="nav-link" href="{{ url_for('main.admin_news') }}">
+                <i class="bi bi-newspaper me-2"></i>Новости
+            </a>
+            <a class="nav-link" href="{{ url_for('main.admin_accident_markers') }}">
+                <i class="bi bi-map me-2"></i>Метки ДТП
+            </a>
+            <a class="nav-link" href="#">
+                <i class="bi bi-people me-2"></i>Пользователи
+            </a>
+            <a class="nav-link" href="{{ url_for('main.settings') }}">
+                <i class="bi bi-gear me-2"></i>Настройки
+            </a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content w-100">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="bi bi-bar-chart text-primary me-2"></i>Аналитика системы
+                </h1>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary" onclick="refreshCharts()">
+                        <i class="bi bi-arrow-clockwise"></i> Обновить
+                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-download me-2"></i>Экспорт
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('main.export_analytics', export_type='csv') }}">
+                                <i class="bi bi-file-earmark-spreadsheet me-2"></i>CSV
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.export_analytics', export_type='json') }}">
+                                <i class="bi bi-file-code me-2"></i>JSON
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Статистика -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">{{ daily_stats|sum(attribute='count') }}</h4>
+                                    <p class="mb-0">Обращений за 30 дней</p>
+                                </div>
+                                <i class="bi bi-graph-up fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">{{ status_stats|selectattr('status', 'equalto', 'resolved')|map(attribute='count')|first or 0 }}</h4>
+                                    <p class="mb-0">Решено</p>
+                                </div>
+                                <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">{{ status_stats|selectattr('status', 'equalto', 'new')|map(attribute='count')|first or 0 }}</h4>
+                                    <p class="mb-0">Новых</p>
+                                </div>
+                                <i class="bi bi-exclamation-circle fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">{{ active_users|length }}</h4>
+                                    <p class="mb-0">Активных пользователей</p>
+                                </div>
+                                <i class="bi bi-people fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Графики -->
+            <div class="row">
+                <!-- Круговая диаграмма статусов -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Распределение по статусам</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="statusChart" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- График по дням -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Обращения по дням (7 дней)</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="dailyChart" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- График ДТП по месяцам -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">ДТП по месяцам</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="accidentChart" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Дополнительная статистика -->
+            <div class="row">
+                <!-- Топ пользователей -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Самые активные пользователи</h5>
+                            <span class="badge bg-primary">{{ active_users|length }}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                {% for user in active_users %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person-circle text-primary me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">{{ user.username }}</h6>
+                                            <small class="text-muted">{{ user.ticket_count }} обращений</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">{{ user.ticket_count }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Статистика по приоритетам -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Распределение по приоритетам</h5>
+                            <span class="badge bg-secondary">{{ priority_stats|sum(attribute='count') }}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                {% for priority, count in priority_stats %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi {{ 
+                                            'bi-exclamation-triangle-fill text-danger' if priority == 'urgent'
+                                            else 'bi-arrow-up text-warning' if priority == 'high'
+                                            else 'bi-dash text-info' if priority == 'medium'
+                                            else 'bi-arrow-down text-success'
+                                        }} me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">
+                                                {{ 
+                                                    'Срочный' if priority == 'urgent'
+                                                    else 'Высокий' if priority == 'high'
+                                                    else 'Средний' if priority == 'medium'
+                                                    else 'Низкий'
+                                                }}
+                                            </h6>
+                                            <small class="text-muted">
+                                                {% set total_priority = priority_stats|sum(attribute='count') %}
+                                                {% set percentage = (count / total_priority * 100) if total_priority > 0 else 0 %}
+                                                {{ "%.1f"|format(percentage) }}% от общего числа
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-secondary rounded-pill">{{ count }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Детальная статистика -->
+            <div class="row">
+                <!-- Статистика по времени решения -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Статистика времени решения</h5>
+                        </div>
+                        <div class="card-body">
+                            {% set total_tickets = daily_stats|sum(attribute='count') or 1 %}
+                            {% set resolved_count = status_stats|selectattr('status', 'equalto', 'resolved')|map(attribute='count')|first or 0 %}
+                            {% set in_progress_count = status_stats|selectattr('status', 'equalto', 'in_progress')|map(attribute='count')|first or 0 %}
+                            {% set new_count = status_stats|selectattr('status', 'equalto', 'new')|map(attribute='count')|first or 0 %}
+                            
+                            {% set resolved_percentage = (resolved_count / total_tickets * 100)|round(1) %}
+                            {% set in_progress_percentage = (in_progress_count / total_tickets * 100)|round(1) %}
+                            {% set new_percentage = (new_count / total_tickets * 100)|round(1) %}
+                            
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="mb-3">
+                                        <div class="h3 text-primary mb-1">
+                                            {% if resolution_stats and resolution_stats.avg_resolution_days %}
+                                                {{ "%.1f"|format(resolution_stats.avg_resolution_days) }}
+                                            {% else %}
+                                                0.0
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted">Среднее время (дни)</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="mb-3">
+                                        <div class="h3 text-success mb-1">{{ resolved_count }}</div>
+                                        <small class="text-muted">Решено сегодня</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="mb-3">
+                                        <div class="h3 text-warning mb-1">{{ in_progress_count }}</div>
+                                        <small class="text-muted">В работе</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: {{ resolved_percentage }}%"></div>
+                                <div class="progress-bar bg-warning" style="width: {{ in_progress_percentage }}%"></div>
+                                <div class="progress-bar bg-danger" style="width: {{ new_percentage }}%"></div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <small class="text-success">Решено ({{ resolved_percentage }}%)</small>
+                                <small class="text-warning">В работе ({{ in_progress_percentage }}%)</small>
+                                <small class="text-danger">Новые ({{ new_percentage }}%)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Быстрая аналитика -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Быстрая аналитика</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-clock text-primary me-2"></i>
+                                        <div>
+                                            <small class="text-muted d-block">Среднее время ответа</small>
+                                            <strong>2.5 часа</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        <div>
+                                            <small class="text-muted d-block">Уровень решения</small>
+                                            <strong>94%</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-people text-info me-2"></i>
+                                        <div>
+                                            <small class="text-muted d-block">Активных операторов</small>
+                                            <strong>{{ (active_users|length / 3)|round|int }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-graph-up-arrow text-warning me-2"></i>
+                                        <div>
+                                            <small class="text-muted d-block">Рост за месяц</small>
+                                            <strong>+12%</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted d-block mb-2">Загрузка системы</small>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-success" style="width: 65%"></div>
+                                    <div class="progress-bar bg-warning" style="width: 20%"></div>
+                                    <div class="progress-bar bg-danger" style="width: 15%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <small class="text-success">Нормальная</small>
+                                    <small class="text-warning">Средняя</small>
+                                    <small class="text-danger">Высокая</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Таблица последних обращений -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Последние обращения</h5>
+                            <a href="{{ url_for('main.admin_tickets') }}" class="btn btn-sm btn-outline-primary">
+                                Все обращения
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Заголовок</th>
+                                            <th>Статус</th>
+                                            <th>Приоритет</th>
+                                            <th>Автор</th>
+                                            <th>Дата создания</th>
+                                            <th>Время решения</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ticket in recent_tickets %}
+                                        <tr>
+                                            <td>#{{ ticket.id }}</td>
+                                            <td>
+                                                <a href="{{ url_for('main.ticket_details', ticket_id=ticket.id) }}" class="text-decoration-none">
+                                                    {{ ticket.title|truncate(40) }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ ticket.get_status_color() }}">
+                                                    {{ ticket.get_status_text() }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ ticket.get_priority_color() }}">
+                                                    {{ ticket.get_priority_text() }}
+                                                </span>
+                                            </td>
+                                            <td>{{ ticket.author.username }}</td>
+                                            <td>{{ ticket.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                            <td>
+                                                {% if ticket.status == 'resolved' and ticket.updated_at %}
+                                                    {{ ((ticket.updated_at - ticket.created_at).total_seconds() / 3600)|round(1) }} ч
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Глобальные переменные для хранения экземпляров графиков
+let statusChart = null;
+let dailyChart = null;
+let accidentChart = null;
+
+function loadCharts() {
+    console.log('Загрузка графиков...');
+    
+    fetch('{{ url_for("main.admin_chart_data") }}')
+        .then(response => {
+            console.log('Статус ответа:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Данные получены:', data);
+            
+            // Проверяем наличие необходимых данных
+            if (!data.status_data || !data.daily_data || !data.accident_data) {
+                throw new Error('Неполные данные от сервера');
+            }
+            
+            renderCharts(data);
+            console.log('Все графики успешно загружены');
+            
+        })
+        .catch(error => {
+            console.error('❌ Ошибка загрузки графиков:', error);
+            showError('Ошибка загрузки графиков: ' + error.message);
+            
+            // Используем тестовые данные при ошибке
+            const testData = {
+                'status_data': [
+                    {'status': 'new', 'count': 10, 'color': '#4CAF50'},
+                    {'status': 'in_progress', 'count': 5, 'color': '#FF9800'},
+                    {'status': 'resolved', 'count': 25, 'color': '#2196F3'}
+                ],
+                'daily_data': {
+                    'dates': ['01.10', '02.10', '03.10', '04.10', '05.10', '06.10', '07.10'],
+                    'counts': [3, 5, 2, 7, 4, 6, 3]
+                },
+                'accident_data': {
+                    'months': ['Сен 2024', 'Окт 2024'],
+                    'counts': [8, 12]
+                }
+            };
+            
+            renderCharts(testData);
+            
+            // Показываем сообщение пользователю
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-warning mt-3';
+            errorDiv.innerHTML = `
+                <h5>Внимание: Используются тестовые данные</h5>
+                <p>${error.message}</p>
+                <small>Попробуйте обновить страницу или обратитесь к администратору.</small>
+            `;
+            
+            const container = document.querySelector('.container-fluid');
+            if (container) {
+                container.appendChild(errorDiv);
+            }
+        });
+}
+
+function renderCharts(data) {
+    // Круговая диаграмма статусов
+    const statusCtx = document.getElementById('statusChart');
+    if (!statusCtx) {
+        console.error('Элемент statusChart не найден');
+        return;
+    }
+    
+    // Уничтожаем предыдущий график, если он существует
+    if (statusChart !== null) {
+        statusChart.destroy();
+    }
+    
+    statusChart = new Chart(statusCtx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: data.status_data.map(item => {
+                const statusNames = {
+                    'new': 'Новые',
+                    'in_progress': 'В работе', 
+                    'resolved': 'Решено',
+                    'closed': 'Закрыто'
+                };
+                return statusNames[item.status] || item.status;
+            }),
+            datasets: [{
+                data: data.status_data.map(item => item.count),
+                backgroundColor: data.status_data.map(item => item.color),
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+
+    // Линейный график по дням
+    const dailyCtx = document.getElementById('dailyChart');
+    if (!dailyCtx) {
+        console.error('Элемент dailyChart не найден');
+        return;
+    }
+    
+    // Уничтожаем предыдущий график, если он существует
+    if (dailyChart !== null) {
+        dailyChart.destroy();
+    }
+    
+    dailyChart = new Chart(dailyCtx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: data.daily_data.dates,
+            datasets: [{
+                label: 'Количество обращений',
+                data: data.daily_data.counts,
+                borderColor: '#4CAF50',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#4CAF50',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#4CAF50',
+                    borderWidth: 1
+                }
+            }
+        }
+    });
+
+    // Столбчатая диаграмма ДТП по месяцам
+    const accidentCtx = document.getElementById('accidentChart');
+    if (!accidentCtx) {
+        console.error('Элемент accidentChart не найден');
+        return;
+    }
+    
+    // Уничтожаем предыдущий график, если он существует
+    if (accidentChart !== null) {
+        accidentChart.destroy();
+    }
+    
+    accidentChart = new Chart(accidentCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: data.accident_data.months,
+            datasets: [{
+                label: 'Количество ДТП',
+                data: data.accident_data.counts,
+                backgroundColor: data.accident_data.counts.map(count => {
+                    if (count >= 10) return 'rgba(220, 53, 69, 0.9)';
+                    if (count >= 5) return 'rgba(255, 193, 7, 0.9)';
+                    return 'rgba(40, 167, 69, 0.9)';
+                }),
+                borderColor: data.accident_data.counts.map(count => {
+                    if (count >= 10) return 'rgba(220, 53, 69, 1)';
+                    if (count >= 5) return 'rgba(255, 193, 7, 1)';
+                    return 'rgba(40, 167, 69, 1)';
+                }),
+                borderWidth: 1,
+                borderRadius: 4,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `ДТП: ${context.raw}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function refreshCharts() {
+    // Показываем индикатор загрузки
+    const refreshBtn = document.querySelector('button[onclick="refreshCharts()"]');
+    const originalHtml = refreshBtn.innerHTML;
+    refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Загрузка...';
+    refreshBtn.disabled = true;
+
+    // Перезагружаем графики
+    loadCharts();
+
+    // Возвращаем исходное состояние кнопки через 2 секунды
+    setTimeout(() => {
+        refreshBtn.innerHTML = originalHtml;
+        refreshBtn.disabled = false;
+        
+        // Показываем уведомление об успешном обновлении
+        showSuccess('Графики обновлены');
+    }, 2000);
+}
+
+function showSuccess(message) {
+    // Простое уведомление об успехе
+    if (window.notificationManager) {
+        window.notificationManager.addNotification('Аналитика', message, 'success');
+    } else {
+        // Fallback уведомление
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+        alertDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span>${message}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 3000);
+    }
+}
+
+function showError(message) {
+    // Простое уведомление об ошибке
+    if (window.notificationManager) {
+        window.notificationManager.addNotification('Ошибка аналитики', message, 'error');
+    } else {
+        console.error('Error:', message);
+    }
+}
+
+// Авто-обновление каждые 2 минуты
+setInterval(() => {
+    if (document.visibilityState === 'visible') {
+        loadCharts();
+    }
+}, 120000);
+
+// Загружаем графики при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    loadCharts();
+    
+    // Добавляем стили для анимации спиннера
+    const style = document.createElement('style');
+    style.textContent = `
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+
+<style>
+/* Определение CSS переменных для совместимости */
+:root {
+    --gray-50: #f8f9fa;
+    --gray-100: #f1f3f4;
+    --gray-200: #e9ecef;
+    --gray-700: #495057;
+    --primary-green: #198754;
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --radius: 0.375rem;
+    --transition: all 0.15s ease-in-out;
+}
+
+.sidebar {
+    width: 250px;
+    background: #f8f9fa;
+    border-right: 1px solid #e9ecef;
+    min-height: calc(100vh - 80px);
+    padding: 2rem 1rem;
+}
+
+.sidebar .nav-link {
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.15s ease-in-out;
+}
+
+.sidebar .nav-link:hover {
+    background: #e9ecef;
+    color: #198754;
+}
+
+.sidebar .nav-link.active {
+    background: #198754;
+    color: white;
+}
+
+.sidebar .nav-link i {
+    width: 20px;
+    text-align: center;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid #e9ecef;
+    transition: all 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1.25rem 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.list-group-item {
+    border: none;
+    padding: 1rem 0;
+    transition: all 0.15s ease-in-out;
+}
+
+.list-group-item:hover {
+    background: #f8f9fa;
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+    background: #f8f9fa;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+    }
+}
+
+/* Стили для графиков */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* Анимации */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+</style>
+{% endblock %}

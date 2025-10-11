@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="bi bi-megaphone text-primary me-2"></i>
+                        Сообщить о проблеме
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('main.create_ticket') }}" enctype="multipart/form-data" id="ticketForm">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control", placeholder="Краткое описание проблемы") }}
+                            {% if form.title.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.title.errors %}
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows=5, placeholder="Подробное описание проблемы...") }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.description.errors %}
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <span id="descriptionCount">0</span>/1000 символов
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.location.label(class="form-label") }}
+                            {{ form.location(class="form-control", placeholder="Адрес или ориентир") }}
+                            {% if form.location.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.location.errors %}
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form.priority.label(class="form-label") }}
+                            {{ form.priority(class="form-select") }}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Выберите приоритет проблемы:
+                                <span class="badge bg-danger ms-2">Срочный</span> - ДТП, аварии
+                                <span class="badge bg-warning ms-1">Высокий</span> - Опасные ситуации
+                                <span class="badge bg-info ms-1">Средний</span> - Обычные проблемы
+                                <span class="badge bg-success ms-1">Низкий</span> - Мелкие неисправности
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form.image.label(class="form-label") }}
+                            {{ form.image(class="form-control") }}
+                            <div class="form-text">
+                                <i class="bi bi-camera me-1"></i>
+                                Загрузите фото проблемы (необязательно). 
+                                Разрешены форматы: JPG, PNG, GIF, WebP
+                            </div>
+                            {% if form.image.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.image.errors %}
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="bi bi-map me-1"></i>
+                                Выберите местоположение на карте
+                            </label>
+                            <div class="map-container" style="height: 300px; border-radius: 8px; overflow: hidden;">
+                                <div id="location-map" style="height: 100%; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                                    <div class="text-center text-muted p-4">
+                                        <i class="bi bi-geo-alt display-4"></i>
+                                        <p class="mt-2 mb-2">Карта для выбора местоположения</p>
+                                        <button type="button" class="btn btn-outline-primary mt-2" onclick="selectLocation(54.7826, 32.0453)">
+                                            Выбрать центр Смоленска
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="lat" name="lat" required>
+                            <input type="hidden" id="lng" name="lng" required>
+                            <div class="form-text">
+                                <i class="bi bi-geo me-1"></i>
+                                Нажмите на кнопку выше или укажите координаты вручную
+                            </div>
+                            <div id="locationError" class="text-danger small mt-1" style="display: none;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Пожалуйста, выберите местоположение на карте
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function initLocationMap() {
+    const mapContainer = document.getElementById('location-map');
+    if (mapContainer) {
+        mapContainer.innerHTML = `
+            <div style="height:100%; display:flex; align-items:center; justify-content:center; background:#1e293b; border-radius:8px; color:white;">
+                <div style="text-align:center; padding:20px;">
+                    <i class="bi bi-map display-4 text-primary"></i>
+                    <h5 class="mt-3">Выбор местоположения</h5>
+                    <p class="text-secondary">Кликните на карте для выбора местоположения</p>
+                    <div class="btn-group mt-3">
+                        <button class="btn btn-outline-primary" onclick="selectLocation(54.7826, 32.0453)">
+                            Центр Смоленска
+                        </button>
+                        <button class="btn btn-outline-success" onclick="selectLocation(54.7938, 32.0507)">
+                            Северный район
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="selectLocation(54.7704, 32.0398)">
+                            Южный район
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+function selectLocation(lat, lng) {
+    document.getElementById('lat').value = lat;
+    document.getElementById('lng').value = lng;
+    document.getElementById('locationError').style.display = 'none';
+    
+    const mapContainer = document.getElementById('location-map');
+    mapContainer.innerHTML = `
+        <div style="height:100%; background:linear-gradient(45deg, #1e293b, #334155); border-radius:8px; 
+                    display:flex; align-items:center; justify-content:center; color:white;">
+            <div style="text-align:center;">
+                <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                <p class="mt-2">Местоположение выбрано</p>
+                <small class="text-secondary">Широта: ${lat.toFixed(4)}, Долгота: ${lng.toFixed(4)}</small>
+                <div class="mt-3">
+                    <button class="btn btn-sm btn-outline-light" onclick="initLocationMap()">
+                        Изменить местоположение
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Валидация формы
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('ticketForm');
+    const descriptionField = document.getElementById('description');
+    const descriptionCount = document.getElementById('descriptionCount');
+    
+    // Счетчик символов для описания
+    if (descriptionField && descriptionCount) {
+        descriptionField.addEventListener('input', function() {
+            descriptionCount.textContent = this.value.length;
+            if (this.value.length > 1000) {
+                descriptionCount.className = 'text-danger';
+            } else if (this.value.length > 900) {
+                descriptionCount.className = 'text-warning';
+            } else {
+                descriptionCount.className = 'text-success';
+            }
+        });
+        
+        // Инициализация счетчика
+        descriptionCount.textContent = descriptionField.value.length;
+    }
+    
+    // Валидация формы
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const lat = document.getElementById('lat').value;
+            const lng = document.getElementById('lng').value;
+            const locationError = document.getElementById('locationError');
+            
+            if (!lat || !lng) {
+                e.preventDefault();
+                locationError.style.display = 'block';
+                // Прокрутка к ошибке
+                locationError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+        });
+    }
+    
+    initLocationMap();
+});
+</script>
+
+<style>
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.map-container {
+    border: 2px dashed #dee2e6;
+    transition: border-color 0.3s ease;
+}
+
+.map-container:hover {
+    border-color: var(--primary-green);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 12px;
+}
+
+.card-header {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1.5rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-light));
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-green-dark), var(--primary-green));
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ошибка сервера — СмолЦОДД</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/errors/error_500.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-content">
+            <i class="bi bi-tools error-icon"></i>
+            
+            <h1 class="error-code">500</h1>
+            <h2 class="error-title">Внутренняя ошибка сервера</h2>
+            
+            <p class="error-description">
+                Произошла непредвиденная ошибка. Наша команда уже уведомлена и работает над решением проблемы.
+                Пожалуйста, попробуйте повторить действие позже.
+            </p>
+
+            <div class="error-alert">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle"></i>
+                    <div>
+                        <strong>Что можно сделать:</strong>
+                        <ul class="mb-0 mt-1">
+                            <li>Попробуйте обновить страницу через несколько минут</li>
+                            <li>Проверьте свое интернет-соединение</li>
+                            <li>Очистите кеш браузера</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="error-actions">
+                <button onclick="window.location.reload()" class="btn-error btn-warning">
+                    <i class="bi bi-arrow-clockwise"></i>Обновить страницу
+                </button>
+                <a href="/" class="btn-error btn-primary">
+                    <i class="bi bi-house"></i>На главную
+                </a>
+                <button class="btn-error btn-outline" onclick="showSupportModal()">
+                    <i class="bi bi-life-preserver"></i>Помощь
+                </button>
+            </div>
+
+            <div class="support-contacts">
+                <h3>Если проблема сохраняется:</h3>
+                <div class="contacts-grid">
+                    <a href="tel:+74812339969" class="contact-item contact-phone">
+                        <i class="bi bi-telephone"></i>
+                        <div class="contact-info">
+                            <div class="contact-label">Телефон поддержки</div>
+                            <div class="contact-value">+7 (4812) 33-99-69</div>
+                        </div>
+                    </a>
+                    <a href="mailto:support@codd-smolensk.ru" class="contact-item contact-email">
+                        <i class="bi bi-envelope"></i>
+                        <div class="contact-info">
+                            <div class="contact-label">Электронная почта</div>
+                            <div class="contact-value">support@codd-smolensk.ru</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="error-time">
+                <small>Время ошибки: <span id="errorTime">загружается...</span></small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно поддержки -->
+    <div id="supportModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Техническая поддержка</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Для получения помощи вы можете:</p>
+                    <ul>
+                        <li>Позвонить по телефону: <strong>+7 (4812) 33-99-69</strong></li>
+                        <li>Написать на email: <strong>support@codd-smolensk.ru</strong></li>
+                        <li>Обратиться в телеграм: <strong>@codd_support</strong></li>
+                    </ul>
+                    <p class="mb-0">Время работы поддержки: Пн-Пт с 9:00 до 18:00</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <a href="tel:+74812339969" class="btn btn-primary">
+                        <i class="bi bi-telephone"></i> Позвонить
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('errorTime').textContent = new Date().toLocaleString('ru-RU');
+
+        function showSupportModal() {
+            const modal = new bootstrap.Modal(document.getElementById('supportModal'));
+            modal.show();
+        }
+    </script>
+</body>
+</html>

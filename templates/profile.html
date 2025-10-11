@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Боковая панель профиля -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        {% if current_user.profile_icon and current_user.profile_icon.startswith('bi-') %}
+                            <div class="avatar-profile mx-auto">
+                            <i class="{{ current_user.profile_icon }} fs-1"></i>
+                        </div>
+                            {% else %}
+                        <div class="avatar-profile mx-auto">
+                            <i class="bi bi-person-circle fs-1"></i>
+                        </div>
+                            {% endif %}
+                    </div>
+
+                    <h4 class="mb-1">{{ current_user.username }}</h4>
+                    <p class="text-secondary mb-3">{{ current_user.email }}</p>
+                    
+                    {% if current_user.is_admin %}
+                        <span class="badge bg-danger mb-3">Администратор</span>
+                    {% else %}
+                        <span class="badge bg-primary mb-3">Пользователь</span>
+                    {% endif %}
+                    
+                    <!-- Статистика пользователя -->
+                    <div class="stats-grid mt-4">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ current_user.tickets.count() }}</div>
+                            <div class="stat-label">Всего обращений</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ current_user.tickets.filter_by(status='new').count() }}</div>
+                            <div class="stat-label">Активные</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Быстрый доступ -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Быстрый доступ</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('main.create_ticket') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Создать обращение
+                        </a>
+                        <a href="{{ url_for('main.tickets_list') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-list-ul me-2"></i>Мои обращения
+                        </a>
+                        {% if current_user.is_admin %}
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-success">
+                            <i class="bi bi-speedometer2 me-2"></i>Панель управления
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основное содержимое профиля -->
+        <div class="col-lg-8">
+            <!-- Форма редактирования профиля -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Редактирование профиля</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('main.profile') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.username.label(class="form-label") }}
+                                {{ form.username(class="form-control") }}
+                                {% if form.username.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.username.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.email.label(class="form-label") }}
+                                {{ form.email(class="form-control") }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h6 class="mb-3">Смена пароля</h6>
+                        
+                        <div class="mb-3">
+                            {{ form.current_password.label(class="form-label") }}
+                            {{ form.current_password(class="form-control", placeholder="Введите текущий пароль") }}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.new_password.label(class="form-label") }}
+                                {{ form.new_password(class="form-control", placeholder="Новый пароль") }}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.confirm_password.label(class="form-label") }}
+                                {{ form.confirm_password(class="form-control", placeholder="Подтвердите пароль") }}
+                                {% if form.confirm_password.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.confirm_password.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="form-text">
+                                Оставьте поля пароля пустыми, если не хотите менять пароль
+                            </div>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Выбор иконки профиля -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Иконка профиля</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3" id="profileIcons">
+                        {% set icons = ['bi-person', 'bi-person-circle', 'bi-person-square', 'bi-person-badge', 
+                                       'bi-person-gear', 'bi-person-check', 'bi-star', 'bi-star-fill',
+                                       'bi-gear', 'bi-gear-fill', 'bi-shield', 'bi-shield-check'] %}
+                        
+                        {% for icon in icons %}
+                        <div class="col-2 text-center">
+                            <button type="button" class="btn btn-outline-primary w-100 icon-select {% if current_user.profile_icon == icon %}active{% endif %}" 
+                                    data-icon="{{ icon }}">
+                                <i class="{{ icon }} fs-4"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Активность (только для админов) -->
+            {% if current_user.is_admin %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Административная информация</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Последний вход:</strong><br>
+                                {% if current_user.last_login %}
+                                    {{ current_user.last_login.strftime('%d.%m.%Y %H:%M') }}
+                                {% else %}
+                                    Неизвестно
+                                {% endif %}
+                            </p>
+                            <p><strong>Зарегистрирован:</strong><br>
+                                {{ current_user.created_at.strftime('%d.%m.%Y %H:%M') }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Статус аккаунта:</strong><br>
+                                <span class="badge {% if current_user.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ 'Активен' if current_user.is_active else 'Заблокирован' }}
+                                </span>
+                            </p>
+                            <p><strong>Права:</strong><br>
+                                <span class="badge bg-primary">Администратор</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Выбор иконки профиля
+    const iconButtons = document.querySelectorAll('.icon-select');
+    
+    iconButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Убираем активный класс у всех кнопок
+            iconButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Добавляем активный класс к выбранной кнопке
+            this.classList.add('active');
+            
+            const icon = this.dataset.icon;
+            
+            // Отправляем запрос на сервер
+            fetch('{{ url_for("main.update_profile_icon") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    profile_icon: icon
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Обновляем аватар в боковой панели
+                    const avatarIcon = document.querySelector('.avatar-profile i');
+                    if (avatarIcon) {
+                        avatarIcon.className = icon + ' fs-1';
+                    }
+                    
+                    // Показываем уведомление
+                    showNotification('Иконка профиля успешно обновлена', 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Ошибка при обновлении иконки', 'error');
+            });
+        });
+    });
+    
+    function showNotification(message, type) {
+        // Создаем уведомление
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show`;
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Добавляем уведомление в начало страницы
+        const container = document.querySelector('.container');
+        container.insertBefore(alert, container.firstChild);
+        
+        // Автоматически скрываем через 3 секунды
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 3000);
+    }
+});
+</script>
+
+<style>
+.avatar-profile {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin: 0 auto;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-green);
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+.icon-select {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-select.active {
+    background: var(--primary-green);
+    border-color: var(--primary-green);
+    color: white;
+}
+</style>
+{% endblock %}

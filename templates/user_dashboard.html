@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="bi bi-speedometer2 text-primary me-2"></i>Статистика
+        </h1>
+        <div class="btn-group">
+            <a href="{{ url_for('main.map') }}" class="btn btn-primary">
+                <i class="bi bi-map"></i> Карта ДТП
+            </a>
+            <a href="{{ url_for('main.create_ticket') }}" class="btn btn-outline-primary">
+                <i class="bi bi-megaphone"></i> Сообщить о проблеме
+            </a>
+        </div>
+    </div>
+
+    <!-- Статистика ДТП -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ accident_stats.last_month }}</h4>
+                            <p class="mb-0">ДТП за месяц</p>
+                        </div>
+                        <i class="bi bi-exclamation-triangle fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ accident_stats.last_year }}</h4>
+                            <p class="mb-0">ДТП за год</p>
+                        </div>
+                        <i class="bi bi-graph-up fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ accident_stats.fatalities_month }}</h4>
+                            <p class="mb-0">Погибших (месяц)</p>
+                        </div>
+                        <i class="bi bi-activity fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ accident_stats.resolved_accidents }}</h4>
+                            <p class="mb-0">Решено ДТП</p>
+                        </div>
+                        <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Последние новости -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-newspaper text-primary me-2"></i>Последние новости
+                    </h5>
+                    <a href="{{ url_for('main.news') }}" class="btn btn-sm btn-outline-primary">
+                        Все новости
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_news %}
+                    <div class="list-group list-group-flush">
+                        {% for news in recent_news %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ news.title }}</h6>
+                                <small class="text-muted">{{ news.created_at.strftime('%d.%m.%Y') }}</small>
+                            </div>
+                            <p class="mb-1 text-muted">{{ news.excerpt|default(news.content|truncate(150)) }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-newspaper display-4"></i>
+                        <p class="mt-2 mb-0">Новостей пока нет</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Последние ДТП -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle text-danger me-2"></i>Последние ДТП
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_accidents %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Описание</th>
+                                    <th>Местоположение</th>
+                                    <th>Дата</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for accident in recent_accidents %}
+                                <tr>
+                                    <td>#{{ accident.id }}</td>
+                                    <td>{{ accident.title }}</td>
+                                    <td>{{ accident.location or 'Не указано' }}</td>
+                                    <td>{{ accident.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('main.ticket_details', ticket_id=accident.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-check-circle display-4"></i>
+                        <p class="mt-2 mb-0">Активных ДТП нет</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Боковая панель -->
+        <div class="col-lg-4">
+            <!-- Быстрые действия -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning text-warning me-2"></i>Быстрые действия
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('main.create_ticket') }}" class="btn btn-primary">
+                            <i class="bi bi-megaphone me-2"></i>Сообщить о проблеме
+                        </a>
+                        <a href="{{ url_for('main.map') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-map me-2"></i>Посмотреть карту
+                        </a>
+                        <a href="{{ url_for('main.tickets_list') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-list-ul me-2"></i>Мои обращения
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Статистика безопасности -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-check text-success me-2"></i>Статистика безопасности
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">Снижение ДТП за месяц</small>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0 text-success">-12%</span>
+                            <i class="bi bi-arrow-down-right text-success"></i>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">Время реакции служб</small>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0">8.5 мин</span>
+                            <span class="badge bg-success">-2.1 мин</span>
+                        </div>
+                    </div>
+                    <div>
+                        <small class="text-muted">Уровень безопасности дорог</small>
+                        <div class="progress mt-1" style="height: 8px;">
+                            <div class="progress-bar bg-success" style="width: 78%"></div>
+                        </div>
+                        <small class="text-muted">78% - Хорошо</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+setTimeout(function() {
+    window.location.reload();
+}, 120000);
+</script>
+{% endblock %}

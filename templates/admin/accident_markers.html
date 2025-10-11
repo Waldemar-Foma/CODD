@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar d-none d-md-block">
+        <div class="nav flex-column">
+            <a class="nav-link" href="{{ url_for('main.admin_dashboard') }}">
+                <i class="bi bi-speedometer2 me-2"></i>Дашборд
+            </a>
+            <a class="nav-link" href="{{ url_for('main.admin_tickets') }}">
+                <i class="bi bi-list-check me-2"></i>Обращения
+            </a>
+            <a class="nav-link" href="{{ url_for('main.admin_analytics') }}">
+                <i class="bi bi-bar-chart me-2"></i>Аналитика
+            </a>
+            <a class="nav-link" href="{{ url_for('main.admin_news') }}">
+                <i class="bi bi-newspaper me-2"></i>Новости
+            </a>
+            <a class="nav-link active" href="{{ url_for('main.admin_accident_markers') }}">
+                <i class="bi bi-map me-2"></i>Метки ДТП
+            </a>
+            <a class="nav-link" href="#">
+                <i class="bi bi-people me-2"></i>Пользователи
+            </a>
+            <a class="nav-link" href="{{ url_for('main.settings') }}">
+                <i class="bi bi-gear me-2"></i>Настройки
+            </a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content w-100">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="bi bi-map text-primary me-2"></i>Управление метками ДТП
+                </h1>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMarkerModal">
+                    <i class="bi bi-plus-circle me-2"></i>Добавить метку
+                </button>
+            </div>
+
+            <!-- Карта -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Карта ДТП</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map" style="height: 400px; width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- Список меток -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Список меток ДТП</h5>
+                    <span class="badge bg-primary">{{ markers|length }}</span>
+                </div>
+                <div class="card-body">
+                    {% if markers %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Название</th>
+                                    <th>Адрес</th>
+                                    <th>Серьезность</th>
+                                    <th>Дата создания</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for marker in markers %}
+                                <tr>
+                                    <td>{{ marker.id }}</td>
+                                    <td>{{ marker.title }}</td>
+                                    <td>{{ marker.address or 'Не указан' }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'danger' if marker.severity == 'high' else 'warning' if marker.severity == 'medium' else 'secondary' }}">
+                                            {{ 'Высокая' if marker.severity == 'high' else 'Средняя' if marker.severity == 'medium' else 'Низкая' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ marker.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                onclick="deleteMarker"({{ marker.id }})"
+                                                title="Удалить метку">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-map text-muted fs-1"></i>
+                        <p class="text-muted mt-2">Метки ДТП отсутствуют</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления метки -->
+<div class="modal fade" id="addMarkerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить метку ДТП</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="markerForm">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Название *</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Описание</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Адрес</label>
+                        <input type="text" class="form-control" id="address" name="address">
+                    </div>
+                    <div class="mb-3">
+                        <label for="severity" class="form-label">Серьезность</label>
+                        <select class="form-select" id="severity" name="severity">
+                            <option value="low">Низкая</option>
+                            <option value="medium" selected>Средняя</option>
+                            <option value="high">Высокая</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Для добавления метки кликните на карте в нужном месте
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="saveMarker()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://api-maps.yandex.ru/2.1/?apikey={{ yandex_api_key }}&lang=ru_RU" type="text/javascript"></script>
+<script>
+let map;
+let markerCollection;
+let newMarker = null;
+
+// Инициализация карты
+ymaps.ready(initMap);
+
+function initMap() {
+    map = new ymaps.Map('map', {
+        center: [54.7826, 32.0453], // Смоленск
+        zoom: 12
+    });
+
+    markerCollection = new ymaps.GeoObjectCollection();
+    map.geoObjects.add(markerCollection);
+
+    // Загрузка существующих меток
+    loadMarkers();
+
+    // Обработчик клика по карте
+    map.events.add('click', function (e) {
+        const coords = e.get('coords');
+        
+        // Удаляем предыдущую временную метку
+        if (newMarker) {
+            map.geoObjects.remove(newMarker);
+        }
+
+        // Создаем новую временную метку
+        newMarker = new ymaps.Placemark(coords, {
+            hintContent: 'Новая метка ДТП',
+            balloonContent: 'Кликните для сохранения'
+        }, {
+            preset: 'islands#redIcon',
+            draggable: true
+        });
+
+        map.geoObjects.add(newMarker);
+
+        // Обновляем координаты в форме
+        document.getElementById('lat').value = coords[0].toFixed(6);
+        document.getElementById('lng').value = coords[1].toFixed(6);
+    });
+}
+
+function loadMarkers() {
+    fetch('{{ url_for("main.api_accident_markers") }}')
+        .then(response => response.json())
+        .then(markers => {
+            markerCollection.removeAll();
+            
+            markers.forEach(marker => {
+                const placemark = new ymaps.Placemark(
+                    [marker.lat, marker.lng],
+                    {
+                        hintContent: marker.title,
+                        balloonContent: `
+                            <strong>${marker.title}</strong><br>
+                            ${marker.description || ''}<br>
+                            <small>${marker.address || ''}</small><br>
+                            <small>Серьезность: ${getSeverityText(marker.severity)}</small>
+                        `
+                    },
+                    {
+                        preset: getPresetBySeverity(marker.severity)
+                    }
+                );
+                
+                markerCollection.add(placemark);
+            });
+        })
+        .catch(error => console.error('Ошибка загрузки меток:', error));
+}
+
+function getPresetBySeverity(severity) {
+    const presets = {
+        'high': 'islands#redIcon',
+        'medium': 'islands#orangeIcon',
+        'low': 'islands#blueIcon'
+    };
+    return presets[severity] || 'islands#blueIcon';
+}
+
+function getSeverityText(severity) {
+    const texts = {
+        'high': 'Высокая',
+        'medium': 'Средняя',
+        'low': 'Низкая'
+    };
+    return texts[severity] || 'Неизвестно';
+}
+
+function saveMarker() {
+    if (!newMarker) {
+        alert('Сначала выберите место на карте!');
+        return;
+    }
+
+    const coords = newMarker.geometry.getCoordinates();
+    const formData = {
+        lat: coords[0],
+        lng: coords[1],
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        address: document.getElementById('address').value,
+        severity: document.getElementById('severity').value
+    };
+
+    if (!formData.title) {
+        alert('Заполните название метки!');
+        return;
+    }
+
+    fetch('{{ url_for("main.create_accident_marker") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Закрываем модальное окно
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addMarkerModal'));
+            modal.hide();
+            
+            // Сбрасываем форму
+            document.getElementById('markerForm').reset();
+            
+            // Удаляем временную метку
+            map.geoObjects.remove(newMarker);
+            newMarker = null;
+            
+            // Перезагружаем метки
+            loadMarkers();
+            
+            // Показываем уведомление
+            showNotification('Метка ДТП успешно добавлена', 'success');
+        } else {
+            throw new Error(data.error || 'Ошибка при сохранении');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        showNotification('Ошибка при сохранении метки: ' + error.message, 'error');
+    });
+}
+
+function deleteMarker(markerId) {
+    if (!confirm('Вы уверены, что хотите удалить эту метку ДТП?')) {
+        return;
+    }
+
+    fetch(`/api/accident-markers/${markerId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadMarkers();
+            showNotification('Метка ДТП успешно удалена', 'success');
+        } else {
+            throw new Error('Ошибка при удалении');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        showNotification('Ошибка при удалении метки', 'error');
+    });
+}
+
+function showNotification(message, type) {
+    // Простая реализация уведомления
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+    alertDiv.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'} me-2"></i>
+            <span>${message}</span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Очистка временной метки при закрытии модального окна
+document.getElementById('addMarkerModal').addEventListener('hidden.bs.modal', function () {
+    if (newMarker) {
+        map.geoObjects.remove(newMarker);
+        newMarker = null;
+    }
+});
+</script>
+
+<style>
+.sidebar {
+    width: 250px;
+    background: #f8f9fa;
+    border-right: 1px solid #e9ecef;
+    min-height: calc(100vh - 80px);
+    padding: 2rem 1rem;
+}
+
+.sidebar .nav-link {
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.15s ease-in-out;
+}
+
+.sidebar .nav-link:hover {
+    background: #e9ecef;
+    color: #198754;
+}
+
+.sidebar .nav-link.active {
+    background: #198754;
+    color: white;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid #e9ecef;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+}
+</style>
+{% endblock %}

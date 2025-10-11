@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}Контакты - СмолЦОДД{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-5">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Главная</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Контакты</li>
+                </ol>
+            </nav>
+            
+            <h1 class="display-4 mb-3">Контакты</h1>
+            <p class="lead text-muted">Свяжитесь с нами для решения вопросов, связанных с организацией дорожного движения</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h3 mb-4">Центр организации дорожного движения Смоленской области</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="contact-item">
+                                <div class="contact-icon bg-primary text-white">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                </div>
+                                <div class="contact-info">
+                                    <h5>Адрес</h5>
+                                    <p>ул. Большая Краснофлотская, д. 70<br>Смоленск, Смоленская область</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="contact-item">
+                                <div class="contact-icon bg-success text-white">
+                                    <i class="bi bi-telephone-fill"></i>
+                                </div>
+                                <div class="contact-info">
+                                    <h5>Телефон</h5>
+                                    <p>+7 (4812) 33-99-69</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="contact-item">
+                                <div class="contact-icon bg-info text-white">
+                                    <i class="bi bi-envelope-fill"></i>
+                                </div>
+                                <div class="contact-info">
+                                    <h5>Email</h5>
+                                    <p>ref@codd67.ru</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="contact-item">
+                                <div class="contact-icon bg-warning text-white">
+                                    <i class="bi bi-clock-fill"></i>
+                                </div>
+                                <div class="contact-info">
+                                    <h5>Режим работы</h5>
+                                    <p>Пн-Чт: 08:00-17:00<br>Пт: 08:00-15:00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Карта расположения ЦОДД -->
+                    <div class="mt-5">
+                        <h3 class="h4 mb-3">Расположение ЦОДД на карте</h3>
+                        <div class="map-container" style="height: 400px; border-radius: 12px; overflow: hidden;">
+                            <div id="contact-map" style="width: 100%; height: 100%;"></div>
+                        </div>
+                        <p class="text-muted mt-2">ул. Большая Краснофлотская, д. 70, Смоленск</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Боковая панель с дополнительной информацией -->
+        <div class="col-lg-4">
+            <!-- Экстренные контакты -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Экстренные службы</h5>
+                </div>
+                <div class="card-body">
+                    <div class="emergency-contact">
+                        <div class="emergency-icon">
+                            <i class="bi bi-telephone-fill text-danger"></i>
+                        </div>
+                        <div class="emergency-info">
+                            <h6>112</h6>
+                            <small>Единая служба спасения</small>
+                        </div>
+                    </div>
+                    
+                    <div class="emergency-contact">
+                        <div class="emergency-icon">
+                            <i class="bi bi-car-front-fill text-warning"></i>
+                        </div>
+                        <div class="emergency-info">
+                            <h6>Дорожная служба</h6>
+                            <small>+7 (4812) 33-99-69</small>
+                        </div>
+                    </div>
+                    
+                    <div class="emergency-contact">
+                        <div class="emergency-icon">
+                            <i class="bi bi-building-fill text-info"></i>
+                        </div>
+                        <div class="emergency-info">
+                            <h6>Администрация города</h6>
+                            <small>+7 (4812) 38-01-20</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Дополнительные отделы -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="h3 mb-4">Наши отделы</h2>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="department-icon bg-primary text-white mx-auto mb-3">
+                        <i class="bi bi-clipboard-data"></i>
+                    </div>
+                    <h5>Аналитический отдел</h5>
+                    <p class="text-muted">Анализ дорожной ситуации и статистики</p>
+                    <p><strong>Телефон:</strong> +7 (4812) 33-99-70</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="department-icon bg-success text-white mx-auto mb-3">
+                        <i class="bi bi-tools"></i>
+                    </div>
+                    <h5>Технический отдел</h5>
+                    <p class="text-muted">Обслуживание дорожной инфраструктуры</p>
+                    <p><strong>Телефон:</strong> +7 (4812) 33-99-71</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="department-icon bg-info text-white mx-auto mb-3">
+                        <i class="bi bi-headset"></i>
+                    </div>
+                    <h5>Служба поддержки</h5>
+                    <p class="text-muted">Консультации и прием обращений</p>
+                    <p><strong>Телефон:</strong> +7 (4812) 33-99-72</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.contact-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.2rem;
+}
+
+.contact-info h5 {
+    margin-bottom: 5px;
+    color: var(--gray-800);
+}
+
+.emergency-contact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.emergency-contact:last-child {
+    border-bottom: none;
+}
+
+.emergency-icon {
+    font-size: 1.5rem;
+}
+
+.emergency-info h6 {
+    margin-bottom: 2px;
+    color: var(--gray-800);
+}
+
+.department-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+#contactForm .form-control {
+    border-radius: 8px;
+    border: 1px solid var(--gray-300);
+}
+
+#contactForm .form-control:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(98, 167, 68, 0.25);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация карты контактов
+    if (document.getElementById('contact-map')) {
+        setTimeout(() => {
+            if (window.mapManager && typeof window.mapManager.initContactMap === 'function') {
+                window.mapManager.initContactMap();
+            }
+        }, 1000);
+    }
+
+    // Обработка формы обратной связи
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Здесь должна быть логика отправки формы
+            alert('Сообщение отправлено! Мы свяжемся с вами в ближайшее время.');
+            contactForm.reset();
+        });
+    }
+});
+</script>
+{% endblock %}

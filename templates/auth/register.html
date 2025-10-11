@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card auth-card border-0">
+                <div class="card-body p-5">
+                    <!-- Header -->
+                    <div class="auth-header mb-4">
+                        <h1 class="auth-title">Регистрация</h1>
+                        <p class="auth-subtitle">Создайте свой аккаунт</p>
+                    </div>
+
+                    <!-- Form -->
+                    <form method="POST" action="{{ url_for('auth.register') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-floating mb-4">
+                            {{ form.username(class="form-control", id="username", placeholder=" ") }}
+                            <label for="username">Имя пользователя</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            {{ form.email(class="form-control", id="email", placeholder=" ") }}
+                            <label for="email">Email адрес</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            {{ form.password(class="form-control", id="password", placeholder=" ") }}
+                            <label for="password">Пароль</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            {{ form.password2(class="form-control", id="confirm_password", placeholder=" ") }}
+                            <label for="confirm_password">Подтвердите пароль</label>
+                        </div>
+
+                        <!-- Checkbox for terms agreement -->
+                        <div class="form-check mb-4">
+                            {{ form.agree_terms(class="form-check-input", id="agree_terms") }}
+                            <label class="form-check-label" for="agree_terms">
+                                Я согласен с <a href="{{ url_for('main.terms_of_using') }}" target="_blank">условиями использования</a>
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2 mb-4">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="text-center my-4">
+                        <span class="text-secondary">или зарегистрируйтесь с помощью</span>
+                    </div>
+
+                    <!-- Social registration -->
+                    <div class="d-grid gap-2 mb-4">
+                        <button class="btn btn-outline-primary">
+                            <i class="bi bi-yandex me-2"></i>Регистрация через Телеграм
+                        </button>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="text-center mt-4">
+                        <p class="text-secondary">
+                            Уже есть аккаунт? 
+                            <a href="{{ url_for('auth.login') }}" class="text-primary text-decoration-none fw-semibold">
+                                Войдите
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="auto">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}СмолЦОДД{% endblock %}</title>
+    <meta name="description" content="Центр организации дорожного движения Смоленской области - инновационные решения для безопасности дорожного движения" />
+    <meta name="keywords" content="ЦОДД, Смоленск, дорожное движение, безопасность, дороги, транспорт" />
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/x-icon" />
+    
+    <!-- Bootstrap & icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet" />
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <!-- Main styles -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
+
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <!-- Preloader -->
+    <div id="preloader" class="preloader">
+        <div class="preloader-content">
+            <div class="preloader-spinner"></div>
+            <div class="preloader-text">Загрузка...</div>
+        </div>
+    </div>
+
+    <!-- Accessibility Panel -->
+    <div id="accessibilityPanel" class="accessibility-panel" role="region" aria-label="Панель доступности" aria-hidden="true">
+        <div class="accessibility-controls">
+            <button class="btn btn-accessibility" id="increaseFont" aria-pressed="false">
+                <i class="bi bi-zoom-in"></i> Увеличить шрифт
+            </button>
+            <button class="btn btn-accessibility" id="decreaseFont" aria-pressed="false">
+                <i class="bi bi-zoom-out"></i> Уменьшить шрифт
+            </button>
+            <button class="btn btn-accessibility" id="normalFont" aria-pressed="true">
+                <i class="bi bi-fonts"></i> Обычный шрифт
+            </button>
+            <button class="btn btn-accessibility" id="highContrast" aria-pressed="false">
+                <i class="bi bi-circle-half"></i> Высокая контрастность
+            </button>
+            <button class="btn btn-accessibility" id="grayscale" aria-pressed="false">
+                <i class="bi bi-droplet"></i> Черно-белый режим
+            </button>
+            <button class="btn btn-close-accessibility" id="closeAccessibility">
+                <i class="bi bi-x-lg"></i> Закрыть
+            </button>
+        </div>
+    </div>
+
+    <!-- Accessibility Toggle Button -->
+    <button id="accessibilityToggle" class="accessibility-toggle" aria-label="Открыть панель доступности">
+        <i class="bi bi-universal-access"></i>
+    </button>
+
+    <!-- Header -->
+    <header class="header" role="banner" aria-label="Основная шапка сайта">
+        <nav class="navbar-main" role="navigation" aria-label="Главная навигация">
+            <div class="container">
+                <!-- Brand -->
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                    <div class="brand-container">
+                        <div class="logo">
+                            <img src="{{ url_for('static', filename='images/logo_black.svg') }}" alt="ЦОДД Смоленской области" class="logo-img">
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Action buttons - Всегда видимые -->
+                <div class="navbar-actions">
+                    <!-- Search -->
+                    <div class="search-container">
+                        <form class="search-form" role="search" id="searchFormDesktop">
+                            <div class="search-input-group">
+                                <input type="text" class="search-input" placeholder="Поиск..." 
+                                       aria-label="Поисковый запрос" id="searchInputDesktop">
+                                <button type="submit" class="search-btn">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                            <div class="search-suggestions" id="searchSuggestionsDesktop"></div>
+                        </form>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="action-buttons">
+                        <!-- Theme toggle -->
+                        <button class="btn-action btn-theme" id="themeToggle" aria-label="Сменить тему">
+                            <i class="bi bi-moon-fill"></i>
+                        </button>
+
+                        <!-- Notifications -->
+                        <div class="dropdown">
+                            <button class="btn-action btn-notification" id="notificationDropdown" 
+                                    data-bs-toggle="dropdown" aria-label="Уведомления">
+                                <i class="bi bi-bell"></i>
+                                <span class="notification-badge" id="notificationBadge">0</span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end notification-dropdown glass" 
+                                 aria-labelledby="notificationDropdown">
+                                <div class="notification-header">
+                                    <h6>Уведомления</h6>
+                                    <button class="btn btn-sm btn-clear" id="clearNotifications">
+                                        Очистить все
+                                    </button>
+                                </div>
+                                <div class="notification-list" id="notificationList">
+                                    <div class="notification-empty">
+                                        <i class="bi bi-bell-slash"></i>
+                                        <p>Нет новых уведомлений</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User menu -->
+                        {% if current_user.is_authenticated %}
+                        <div class="dropdown user-menu">
+                            <button class="btn-user" data-bs-toggle="dropdown" aria-label="Меню пользователя">
+                                {% if current_user.profile_icon and current_user.profile_icon.startswith('http') %}
+                                <img src="{{ current_user.profile_icon }}" alt="Профиль" class="profile-icon-sm">
+                                {% elif current_user.profile_icon and '/' in current_user.profile_icon %}
+                                <img src="{{ url_for('static', filename='images/profile_icons/' + current_user.profile_icon) }}" 
+                                    alt="Профиль" class="profile-icon-sm">
+                                {% else %}
+                                <i class="{{ current_user.profile_icon }} profile-icon-icon"></i>
+                                {% endif %}
+                                <span class="user-name">{{ current_user.username }}</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end glass">
+                                <li><a class="dropdown-item" href="{{ url_for('main.profile') }}">
+                                    <i class="bi bi-person me-2"></i>Профиль
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.tickets_list') }}">
+                                    <i class="bi bi-list-ul me-2"></i>Мои обращения
+                                </a></li>
+                                {% if current_user.is_admin %}
+                                <li><a class="dropdown-item" href="{{ url_for('main.dashboard') }}">
+                                    <i class="bi bi-speedometer2 me-2"></i>Панель управления
+                                </a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Выйти
+                                </a></li>
+                            </ul>
+                        </div>
+                        {% else %}
+                        <div class="auth-buttons">
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-sm">Войти</a>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Регистрация</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Mobile menu toggle -->
+                <button class="navbar-toggler" type="button" id="mobileMenuToggle" aria-label="Переключить меню">
+                    <span class="toggler-icon"></span>
+                    <span class="toggler-icon"></span>
+                    <span class="toggler-icon"></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Mobile Menu - Справа -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <div class="mobile-brand">
+                <img src="{{ url_for('static', filename='images/logo_black.svg') }}" alt="ЦОДД">
+                <span>ЦОДД Смоленской области</span>
+            </div>
+            <button class="mobile-close" id="mobileMenuClose" aria-label="Закрыть меню">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-menu-content">
+            <!-- Mobile Search -->
+            <div class="mobile-search">
+                <form class="search-form-mobile" id="searchFormMobile">
+                    <div class="search-input-group">
+                        <input type="text" class="search-input" placeholder="Поиск..." 
+                               id="searchInputMobile">
+                        <button type="submit" class="search-btn">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                    <div class="search-suggestions" id="searchSuggestionsMobile"></div>
+                </form>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <nav class="mobile-nav">
+                <a href="{{ url_for('main.index') }}" class="mobile-nav-item {{ 'active' if request.endpoint == 'main.index' }}">
+                    <i class="bi bi-house"></i>
+                    <span>Главная</span>
+                </a>
+
+                <div class="mobile-nav-item mobile-nav-dropdown">
+                    <div class="mobile-nav-header">
+                        <i class="bi bi-info-circle"></i>
+                        <span>О центре</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <div class="mobile-nav-submenu">
+                        <a href="{{ url_for('main.about') }}" class="mobile-nav-subitem">О ЦОДД</a>
+                        <a href="{{ url_for('main.team') }}" class="mobile-nav-subitem">Команда</a>
+                        <a href="{{ url_for('main.projects') }}" class="mobile-nav-subitem">Проекты</a>
+                        <a href="{{ url_for('main.documents') }}" class="mobile-nav-subitem">Документы</a>
+                        <a href="{{ url_for('main.vacancies') }}" class="mobile-nav-subitem">Вакансии</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('main.map') }}" class="mobile-nav-item {{ 'active' if request.endpoint == 'main.map' }}">
+                    <i class="bi bi-map"></i>
+                    <span>Карта дорог</span>
+                </a>
+
+                <a href="{{ url_for('main.news') }}" class="mobile-nav-item {{ 'active' if request.endpoint == 'main.news' }}">
+                    <i class="bi bi-newspaper"></i>
+                    <span>Новости</span>
+                </a>
+
+                <div class="mobile-nav-item mobile-nav-dropdown">
+                    <div class="mobile-nav-header">
+                        <i class="bi bi-tools"></i>
+                        <span>Услуги</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <div class="mobile-nav-submenu">
+                        <a href="{{ url_for('main.services') }}" class="mobile-nav-subitem">Коммерческие услуги</a>
+                        <a href="{{ url_for('main.create_ticket') }}" class="mobile-nav-subitem">Сообщить о проблеме</a>
+                        <a href="{{ url_for('main.free_services') }}" class="mobile-nav-subitem">Бесплатные сервисы</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('main.contacts') }}" class="mobile-nav-item {{ 'active' if request.endpoint == 'main.contacts' }}">
+                    <i class="bi bi-telephone"></i>
+                    <span>Контакты</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <main class="main-content" id="mainContent" role="main">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show glass" role="alert">
+                            <div class="alert-content">
+                                <i class="bi 
+                                    {% if category == 'success' %}bi-check-circle-fill
+                                    {% elif category == 'danger' %}bi-exclamation-triangle-fill
+                                    {% elif category == 'warning' %}bi-exclamation-circle-fill
+                                    {% else %}bi-info-circle-fill{% endif %}"></i>
+                                <span>{{ message }}</span>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Brand and description -->
+                <div class="footer-section">
+                    <h5>ЦОДД Смоленской области</h5>
+                    <p>Инновационные решения для безопасности дорожного движения</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="ВКонтакте"><i class="bi bi-vimeo"></i></a>
+                        <a href="#" class="social-link" aria-label="Телеграм"><i class="bi bi-telegram"></i></a>
+                        <a href="#" class="social-link" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick links -->
+                <div class="footer-section">
+                    <h5>Быстрые ссылки</h5>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('main.map') }}">Карта дорог</a></li>
+                        <li><a href="{{ url_for('main.create_ticket') }}">Сообщить о проблеме</a></li>
+                        <li><a href="{{ url_for('main.services') }}">Наши услуги</a></li>
+                        <li><a href="{{ url_for('main.news') }}">Последние новости</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contacts -->
+                <div class="footer-section">
+                    <h5>Контакты</h5>
+                    <ul class="footer-links">
+                        <li><i class="bi bi-geo-alt"></i> ул. Большая Краснофлотская, д. 70</li>
+                        <li><i class="bi bi-telephone"></i> +7 (4812) 33-99-69</li>
+                        <li><i class="bi bi-envelope"></i> ref@codd67.ru</li>
+                        <li><i class="bi bi-clock"></i> Пн-Чт 08:00-17:00, Пт 08:00-15:00</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 ЦОДД Смоленской области. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to top -->
+    <button id="backToTop" class="back-to-top glass" aria-label="Наверх">
+        <i class="bi bi-chevron-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Project scripts -->
+    <script src="{{ url_for('static', filename='js/preloader.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/notification-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/accessibility.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/search.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

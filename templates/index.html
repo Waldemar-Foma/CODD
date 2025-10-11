@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}ЦОДД Смоленской области - Инновации в дорожном движении{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">
+                    Новый дизайн<br>
+                    <span style="color: var(--primary-green);">— Новая эпоха</span>
+                </h1>
+                <p class="hero-description">
+                    Внедряем инновационные технологии и современные решения для создания 
+                    безопасной и комфортной дорожной среды. Наш опыт и экспертиза — 
+                    гарантия качества и эффективности.
+                </p>
+                <div class="hero-buttons">
+                    <a href="{{ url_for('main.services') }}" class="btn btn-primary btn-lg btn-hero">
+                        <i class="bi bi-tools me-2"></i>Наши услуги
+                    </a>
+                    <a href="{{ url_for('main.create_ticket') }}" class="btn btn-outline-primary btn-lg btn-hero">
+                        <i class="bi bi-megaphone me-2"></i>Сообщить о проблеме
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <h3>Гарантия безопасности</h3>
+                        <p>Современные технологии контроля дорожного движения</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-lightning-charge"></i>
+                        </div>
+                        <h3>Оперативность</h3>
+                        <p>Быстрое реагирование на дорожные ситуации</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Почему выбирают нас</h2>
+            <p class="section-subtitle">Инновационный подход к организации дорожного движения</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <h3>Передовые технологии</h3>
+                <p>Используем современные системы мониторинга и анализа дорожной ситуации</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <h3>Профессиональная команда</h3>
+                <p>Опытные специалисты с многолетним стажем работы в сфере дорожного движения</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <h3>Безопасность прежде всего</h3>
+                <p>Приоритет - безопасность участников дорожного движения и пешеходов</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <h3>Круглосуточная поддержка</h3>
+                <p>Всегда на связи для оперативного решения возникающих проблем</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Preview -->
+<section class="features-section" style="background: var(--gray-50);">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Наши ключевые услуги</h2>
+            <p class="section-subtitle">Комплексные решения для организации дорожного движения</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-traffic-light"></i>
+                </div>
+                <h3>Организация дорожного движения</h3>
+                <p>Проектирование и внедрение эффективных схем дорожного движения</p>
+                <a href="{{ url_for('main.services') }}" class="btn btn-outline-primary btn-sm mt-3">Подробнее</a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-clipboard-data"></i>
+                </div>
+                <h3>Проектирование и экспертиза</h3>
+                <p>Разработка проектной документации и проведение независимой экспертизы</p>
+                <a href="{{ url_for('main.services') }}" class="btn btn-outline-primary btn-sm mt-3">Подробнее</a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-binoculars"></i>
+                </div>
+                <h3>Мониторинг и аналитика</h3>
+                <p>Непрерывный мониторинг дорожной ситуации и аналитика данных</p>
+                <a href="{{ url_for('main.services') }}" class="btn btn-outline-primary btn-sm mt-3">Подробнее</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Наша статистика</h2>
+            <p class="section-subtitle">Результаты нашей работы в цифрах</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card text-center">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #4caf50, #66bb6a);">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <h3 class="text-primary">2,500+</h3>
+                <p>Решенных обращений</p>
+            </div>
+            <div class="feature-card text-center">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #2196f3, #42a5f5);">
+                    <i class="bi bi-geo-alt"></i>
+                </div>
+                <h3 class="text-primary">150+</h3>
+                <p>Обслуживаемых объектов</p>
+            </div>
+            <div class="feature-card text-center">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+                    <i class="bi bi-clock"></i>
+                </div>
+                <h3 class="text-primary">30 мин</h3>
+                <p>Среднее время реакции</p>
+            </div>
+            <div class="feature-card text-center">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #9c27b0, #ba68c8);">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h3 class="text-primary">50+</h3>
+                <p>Профессионалов в команде</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="features-section" style="background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark)); color: white;">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title" style="color: white;">Готовы улучшить дорожную ситуацию?</h2>
+            <p class="section-subtitle" style="color: rgba(255,255,255,0.9);">Присоединяйтесь к числу наших клиентов и получите профессиональные решения</p>
+        </div>
+        <div class="text-center">
+            <div class="hero-buttons justify-content-center">
+                <a href="{{ url_for('main.contacts') }}" class="btn btn-light btn-lg btn-hero">
+                    <i class="bi bi-telephone me-2"></i>Связаться с нами
+                </a>
+                <a href="{{ url_for('main.services') }}" class="btn btn-outline-light btn-lg btn-hero">
+                    <i class="bi bi-info-circle me-2"></i>Узнать больше
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

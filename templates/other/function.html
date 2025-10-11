@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новая возможность скоро будет доступна!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<style>
+    /* Общие стили */
+:root {
+    --primary-green: #62a744; /* RGB (98, 167, 68) */
+    --text-dark: #333;
+    --text-light: #fff;
+    --background-light: #f4f8f2;
+    --footer-bg: #e9f4e3;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: var(--text-dark);
+    background-color: var(--background-light);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1280px; /* Максимальная ширина для ПК */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 30px;
+    border-bottom: 1px solid rgba(98, 167, 68, 0.3);
+}
+
+.logo img {
+    height: 50px; /* Пример размера логотипа */
+}
+
+.main-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.main-nav li {
+    margin-left: 30px;
+}
+
+.main-nav a {
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.main-nav a:hover {
+    color: var(--primary-green);
+}
+
+/* Content Area */
+.content-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 50px 0;
+}
+
+.illustration-wrapper {
+    margin-bottom: 40px;
+    max-width: 500px; /* Ограничиваем размер иллюстрации */
+    width: 100%;
+}
+
+.development-illustration {
+    width: 100%;
+    height: auto;
+    display: block; /* Убирает лишние отступы под изображением */
+}
+
+.text-content h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.5em;
+    color: var(--primary-green);
+    margin-bottom: 20px;
+}
+
+.text-content h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.8em;
+    color: var(--text-dark);
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.text-content p {
+    font-size: 1.1em;
+    margin-bottom: 20px;
+    max-width: 700px; /* Ограничиваем ширину текста для лучшей читаемости */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.text-content strong {
+    color: var(--primary-green);
+}
+
+.call-to-action {
+    margin-top: 40px;
+    background-color: var(--primary-green);
+    color: var(--text-light);
+    padding: 30px;
+    border-radius: 10px;
+    display: inline-block;
+    max-width: 500px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.call-to-action p {
+    margin-bottom: 25px;
+    font-size: 1.1em;
+    max-width: none; /* Отменяем ограничение ширины для текста внутри CTA */
+}
+
+.button {
+    display: inline-block;
+    background-color: var(--text-light);
+    color: var(--primary-green);
+    text-decoration: none;
+    padding: 12px 30px;
+    border-radius: 25px; /* Скругленные края */
+    font-weight: 600;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #e9f4e3; /* Чуть светлее основного зеленого */
+    color: var(--text-dark);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 30px 0;
+    background-color: var(--footer-bg);
+    margin-top: 50px;
+    border-top: 1px solid rgba(98, 167, 68, 0.3);
+    font-size: 0.9em;
+    color: #555;
+}
+
+.footer p {
+    margin: 5px 0;
+}
+
+/* Адаптивность (Mobile-First) */
+
+/* Мобильные устройства (до 768px) */
+@media (max-width: 767px) {
+    .container {
+        padding: 15px;
+    }
+
+    .header {
+        flex-direction: column;
+        padding-bottom: 20px;
+    }
+
+    .logo img {
+        margin-bottom: 15px;
+        height: 40px;
+    }
+
+    .main-nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .main-nav li {
+        margin: 5px 10px;
+    }
+
+    .content-area {
+        padding: 30px 0;
+    }
+
+    .illustration-wrapper {
+        margin-bottom: 30px;
+    }
+
+    .text-content h1 {
+        font-size: 1.8em;
+    }
+
+    .text-content h2 {
+        font-size: 1.4em;
+    }
+
+    .text-content p {
+        font-size: 1em;
+    }
+
+    .call-to-action {
+        padding: 20px;
+    }
+
+    .call-to-action p {
+        font-size: 1em;
+    }
+
+    .button {
+        font-size: 1em;
+        padding: 10px 25px;
+    }
+
+    .footer {
+        margin-top: 30px;
+        padding: 20px 0;
+    }
+}
+
+/* Планшеты (от 768px до 1279px) */
+@media (min-width: 768px) and (max-width: 1279px) {
+    .container {
+        padding: 25px;
+    }
+
+    .content-area {
+        padding: 40px 0;
+    }
+
+    .text-content h1 {
+        font-size: 2.2em;
+    }
+
+    .text-content h2 {
+        font-size: 1.6em;
+    }
+
+    .text-content p {
+        font-size: 1.05em;
+    }
+}
+
+/* ПК (от 1280px и выше) */
+@media (min-width: 1280px) {
+    .container {
+        max-width: 1280px; /* Убедимся, что на ПК ширина не превышает 1280px */
+    }
+}
+</style>
+<body>
+    <div class="container">
+        <header class="header">
+            <!-- Здесь может быть логотип ЦОДД и навигация, если это часть общей структуры сайта -->
+            <div class="logo">
+                <img src="" alt="Логотип ЦОДД">
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#">Главная</a></li>
+                    <li><a href="#">О нас</a></li>
+                    <li><a href="#">Новости</a></li>
+                    <li><a href="#">Контакты</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main class="content-area">
+            <div class="illustration-wrapper">
+                <img src="" alt="Иллюстрация разработки" class="development-illustration">
+            </div>
+            <div class="text-content">
+                <h1>Мы работаем над тем, чтобы сделать город еще лучше!</h1>
+                <p>
+                    Приветствуем вас! Мы в ЦОДД постоянно ищем новые способы сделать вашу жизнь в городе удобнее, безопаснее и приятнее. Сейчас мы готовим к запуску новую полезную функцию, которая поможет вам в этом.
+                </p>
+                <h2>Эта функция находится в разработке</h2>
+                <p>
+                    Мы вкладываем все силы, чтобы она заработала как можно скорее и приносила максимум пользы. Представьте, как благодаря ей ваши ежедневные поездки станут проще, а город – еще более гармоничным.
+                </p>
+                <p>
+                    <strong>Совсем скоро она будет работать!</strong> Мы ценим ваше терпение и понимание.
+                </p>
+                <div class="call-to-action">
+                    <p>
+                        А пока, если у вас есть вопросы или предложения, мы всегда готовы выслушать вас:
+                    </p>
+                    <a href="#" class="button">Связаться с нами</a>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; {{ current_year }} ЦОДД. Все права защищены.</p>
+            <p>Мы заботимся о безопасности и комфорте каждого жителя города.</p>
+        </footer>
+    </div>
+</body>
+</html>

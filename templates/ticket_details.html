@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Заголовок тикета -->
+            <div class="ticket-header mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h2 class="mb-1">{{ ticket.title }}</h2>
+                        <div class="d-flex align-items-center gap-3 text-secondary">
+                            <span>#{{ ticket.id }}</span>
+                            <span>{{ ticket.created_at.strftime('%d.%m.%Y в %H:%M') }}</span>
+                        </div>
+                    </div>
+                    <span class="status-badge status-{{ ticket.status }}">
+                        {{ ticket.get_status_text() }}
+                    </span>
+                </div>
+
+                <div class="d-flex align-items-center text-secondary mb-3">
+                    <i class="bi bi-person me-2"></i>
+                    <span>{{ ticket.author.username }}</span>
+                    <i class="bi bi-geo-alt ms-3 me-2"></i>
+                    <span>{{ ticket.location or 'Местоположение не указано' }}</span>
+                </div>
+
+                {% if ticket.lat and ticket.lng %}
+                <div class="mb-4">
+                    <div class="map-container" style="height: 200px; border-radius: 8px; overflow: hidden;">
+                        <div id="ticket-map" 
+                             data-lat="{{ ticket.lat }}" 
+                             data-lng="{{ ticket.lng }}"
+                             style="height: 100%; background: #1e293b; display: flex; align-items: center; justify-content: center; color: white;">
+                            <div class="text-center">
+                                <i class="bi bi-geo-alt-fill text-primary fs-1"></i>
+                                <p class="mt-2">Местоположение проблемы</p>
+                                <small class="text-secondary">Широта: {{ ticket.lat }}, Долгота: {{ ticket.lng }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Описание -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-card-text me-2"></i>Описание проблемы
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ ticket.description }}</p>
+                </div>
+            </div>
+
+            <!-- Изображение -->
+            {% if ticket.image_path %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-image me-2"></i>Прикрепленное фото
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="ticket-image">
+                        <img src="{{ url_for('static', filename='uploads/' + ticket.image_path) }}" 
+                             alt="Фото проблемы" class="img-fluid rounded" style="max-height: 400px;">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Комментарии -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-dots me-2"></i>Комментарии
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if ticket.comments %}
+                        {% for comment in ticket.comments %}
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-person-circle fs-4 text-secondary"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">{{ comment.author.username }}</h6>
+                                    <small class="text-secondary">{{ comment.created_at.strftime('%d.%m.%Y %H:%M') }}</small>
+                                </div>
+                                <p class="mb-0">{{ comment.content }}</p>
+                                {% if comment.is_internal %}
+                                <small class="text-warning">
+                                    <i class="bi bi-shield-lock"></i> Внутренний комментарий
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-secondary text-center py-3">
+                            <i class="bi bi-chat-square"></i> Комментариев пока нет
+                        </p>
+                    {% endif %}
+
+                    {% if current_user.is_authenticated %}
+                    <form method="POST" action="{{ url_for('main.add_comment', ticket_id=ticket.id) }}">
+                        {{ comment_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ comment_form.content(class="form-control", placeholder="Добавить комментарий...", rows=3) }}
+                            {% if comment_form.content.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in comment_form.content.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if current_user.is_admin %}
+                        <div class="mb-3 form-check">
+                            {{ comment_form.is_internal(class="form-check-input") }}
+                            {{ comment_form.is_internal.label(class="form-check-label") }}
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">Отправить</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Боковая панель -->
+        <div class="col-lg-4">
+            <!-- Статус -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Статус обращения
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="status-badge status-{{ ticket.status }} me-3">
+                            {{ ticket.get_status_text() }}
+                        </span>
+                        {% if current_user.is_admin %}
+                        <div class="btn-group">
+                            <a href="{{ url_for('main.update_status', ticket_id=ticket.id, status='in_progress') }}" 
+                               class="btn btn-sm btn-outline-warning">В работу</a>
+                            <a href="{{ url_for('main.update_status', ticket_id=ticket.id, status='resolved') }}" 
+                               class="btn btn-sm btn-outline-success">Решено</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div class="progress-bar 
+                            {% if ticket.status == 'new' %}bg-primary w-33{% endif %}
+                            {% if ticket.status == 'in_progress' %}bg-warning w-66{% endif %}
+                            {% if ticket.status == 'resolved' %}bg-success w-100{% endif %}">
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between text-sm text-secondary">
+                        <span>Создано</span>
+                        <span>В работе</span>
+                        <span>Решено</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Информация -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock me-2"></i>Информация
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary">Создано:</span>
+                        <span>{{ ticket.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary">Обновлено:</span>
+                        <span>{{ ticket.updated_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary">Приоритет:</span>
+                        <span class="badge bg-{{ ticket.get_priority_color() }}">
+                            {{ ticket.get_priority_text() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-secondary">Автор:</span>
+                        <span>{{ ticket.author.username }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Действия -->
+            {% if current_user.is_admin or current_user.id == ticket.author_id %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-gear me-2"></i>Действия
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if current_user.is_admin %}
+                        <button class="btn btn-outline-warning">
+                            <i class="bi bi-person-check me-2"></i>Назначить себе
+                        </button>
+                        <button class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-up me-2"></i>Изменить приоритет
+                        </button>
+                        {% endif %}
+                        {% if current_user.id == ticket.author_id or current_user.is_admin %}
+                        <form method="POST" action="{{ url_for('main.delete_ticket', ticket_id=ticket.id) }}" 
+                              onsubmit="return confirm('Вы уверены, что хотите удалить это обращение?')">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-trash me-2"></i>Удалить обращение
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function initTicketMap() {
+    const mapContainer = document.getElementById('ticket-map');
+    if (!mapContainer) return;
+
+    const lat = parseFloat(mapContainer.dataset.lat);
+    const lng = parseFloat(mapContainer.dataset.lng);
+
+    if (lat && lng) {
+        mapContainer.innerHTML = `
+            <div style="height:100%; background:linear-gradient(45deg, #1e293b, #334155); border-radius:8px; 
+                        display:flex; align-items:center; justify-content:center; color:white;">
+                <div style="text-align:center;">
+                    <i class="bi bi-geo-alt-fill text-primary fs-1"></i>
+                    <p class="mt-2">Местоположение проблемы</p>
+                    <small class="text-secondary">Широта: ${lat}, Долгота: ${lng}</small>
+                </div>
+            </div>
+        `;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initTicketMap);
+</script>
+
+<style>
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+}
+
+.status-new { background: #4CAF50; }
+.status-in_progress { background: #FF9800; }
+.status-resolved { background: #2196F3; }
+.status-closed { background: #9E9E9E; }
+
+.ticket-header {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: none;
+    border-radius: 12px;
+}
+
+.card-header {
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1rem 1.5rem;
+}
+</style>
+{% endblock %}

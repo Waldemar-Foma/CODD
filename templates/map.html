@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4 mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+                <h2 class="mb-2">Карта дорожной ситуации Смоленской области</h2>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.create_ticket') }}" class="btn btn-primary mb-2">
+                    <i class="bi bi-megaphone me-2"></i>Сообщить о проблеме
+                </a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary mb-2">
+                    <i class="bi bi-person me-2"></i>Войти для сообщений
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Легенда -->
+            <div class="card mb-4">
+                <div class="card-body py-3">
+                    <div class="d-flex flex-wrap gap-3 align-items-center">
+                        <small class="text-muted fw-bold">Легенда:</small>
+                        <div class="legend-item">
+                            <span class="legend-color bg-success me-2" style="width: 12px; height: 12px; display: inline-block; border-radius: 50%;"></span><small>Свободно (0-2)</small>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color bg-warning me-2" style="width: 12px; height: 12px; display: inline-block; border-radius: 50%;"></span><small>Загружено (3-5)</small>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color bg-danger me-2" style="width: 12px; height: 12px; display: inline-block; border-radius: 50%;"></span><small>Пробка (6-9)</small>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color bg-dark me-2" style="width: 12px; height: 12px; display: inline-block; border-radius: 50%;"></span><small>Затор (10)</small>
+                        </div>
+                        <div class="legend-item">
+                            <i class="bi bi-traffic-light text-warning me-2"></i><small>Светофор</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mb-4 d-flex align-items-center">
+                <i class="bi bi-info-circle me-2"></i>
+                Карта ограничена территорией Смоленской области. Данные о пробках обновляются каждые 2 минуты.
+            </div>
+
+            <!-- Контейнер для карты -->
+            <div class="card mb-4">
+                <div class="card-body p-0">
+                    <div id="map" style="width: 100%; height: 500px; border-radius: 0.375rem;"></div>
+                </div>
+            </div>
+            
+            <!-- Управление картой -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5><i class="bi bi-gear text-primary me-2"></i>Управление картой</h5>
+                    <div class="btn-group flex-wrap">
+                        <button type="button" class="btn btn-outline-primary mb-2" onclick="window.mapManager.focusOnSmolensk()">
+                            <i class="bi bi-zoom-in me-1"></i>Смоленск
+                        </button>
+                        <button type="button" class="btn btn-outline-primary mb-2" onclick="window.mapManager.showAllRegion()">
+                            <i class="bi bi-globe me-1"></i>Вся область
+                        </button>
+                        <button type="button" class="btn btn-outline-primary mb-2" id="toggleTraffic">
+                            <i class="bi bi-car-front me-1"></i>Скрыть пробки
+                        </button>
+                        <button type="button" class="btn btn-outline-primary mb-2" onclick="window.mapManager.updateTrafficData()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Обновить пробки
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Информация о пробках -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-car-front me-2"></i>Информация о пробках</h5>
+                </div>
+                <div class="card-body">
+                    <div id="traffic-info" class="row">
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-success mb-1" id="free-roads">0</h3>
+                                <small class="text-muted">Свободных дорог</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-warning mb-1" id="loaded-roads">0</h3>
+                                <small class="text-muted">Загруженных дорог</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-danger mb-1" id="traffic-jams">0</h3>
+                                <small class="text-muted">Пробок</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-dark mb-1" id="heavy-jams">0</h3>
+                                <small class="text-muted">Заторов</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="traffic-details" class="mt-3">
+                        <h6>Детальная информация по дорогам:</h6>
+                        <div id="jam-list" class="small">
+                            <p class="text-muted">Информация о пробках появится здесь после загрузки карты...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Информация о карте и обновления -->
+            <div class="row mt-4">
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-info-circle text-primary me-2"></i>О карте</h5>
+                            <p class="mb-0">Актуальная дорожная ситуация Смоленской области с пробками, светофорами и дорожной инфраструктурой.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-clock text-primary me-2"></i>Обновление</h5>
+                            <p class="mb-0">Последнее обновление: <span id="last-update">--:--</span> (местное время)</p>
+                            <small class="text-muted">Данные о пробках обновляются каждые 2 минуты</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/yandex-maps.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Кнопка переключения пробок
+        document.getElementById('toggleTraffic').addEventListener('click', function() {
+            if (window.mapManager) {
+                window.mapManager.toggleTrafficLayer();
+            }
+        });
+    });
+</script>
+{% endblock %}

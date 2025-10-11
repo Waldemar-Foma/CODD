@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h1 class="display-5 fw-bold mb-4 animated fadeInUp">
+                    Наши услуги для вашего комфорта
+                </h1>
+                <p class="lead mb-5 animated fadeInUp opacity-75" style="animation-delay: 0.2s;">
+                    Профессиональные решения для безопасности дорожного движения<br>
+                    и комфорта всех участников
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="fw-bold mb-4">Наши профессиональные услуги</h2>
+                <p class="text-secondary">Комплексный подход к организации дорожного движения</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% set services = [
+                {'icon': 'bi bi-traffic-light', 'title': 'Проектирование дорожного движения', 'description': 'Разработка схем организации дорожного движения', 'price': 'от 50 000 ₽'},
+                {'icon': 'bi bi-signpost-split', 'title': 'Установка дорожных знаков', 'description': 'Монтаж и обслуживание дорожных знаков', 'price': 'от 15 000 ₽'},
+                {'icon': 'bi bi-stoplights', 'title': 'Светофорные объекты', 'description': 'Проектирование и установка светофоров', 'price': 'от 100 000 ₽'},
+                {'icon': 'bi bi-clipboard-data', 'title': 'Дорожная экспертиза', 'description': 'Анализ дорожной ситуации и безопасности', 'price': 'от 30 000 ₽'},
+                {'icon': 'bi bi-camera-video', 'title': 'Видеонаблюдение', 'description': 'Системы мониторинга дорожной обстановки', 'price': 'от 200 000 ₽'},
+                {'icon': 'bi bi-graph-up', 'title': 'Аналитика и отчетность', 'description': 'Сбор и анализ дорожной статистики', 'price': 'от 25 000 ₽'}
+            ] %}
+            
+            {% for service in services %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card service-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="service-icon">
+                            <i class="{{ service.icon }}"></i>
+                        </div>
+                        <h4 class="card-title text-primary">{{ service.title }}</h4>
+                        <p class="card-text text-secondary">{{ service.description }}</p>
+                        <div class="price-tag mt-3">
+                            <span class="badge bg-primary fs-6">{{ service.price }}</span>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-gradient" data-bs-toggle="modal" data-bs-target="#serviceModal{{ loop.index }}">
+                                Подробнее
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="serviceModal{{ loop.index }}" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">{{ service.title }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <p class="lead">{{ service.description }}</p>
+                                    <h6>Что входит в услугу:</h6>
+                                    <ul>
+                                        <li>Профессиональная консультация</li>
+                                        <li>Выезд специалиста на объект</li>
+                                        <li>Подготовка технической документации</li>
+                                        <li>Качественное выполнение работ</li>
+                                        <li>Гарантийное обслуживание</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="price-card bg-light rounded p-3">
+                                        <h4 class="text-primary">{{ service.price }}</h4>
+                                        <button class="btn btn-primary w-100 mt-2">Заказать</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-lg-8 mx-auto">
+                <div class="card bg-light border-0">
+                    <div class="card-body text-center p-5">
+                        <h3 class="mb-3">Нужна консультация?</h3>
+                        <p class="text-secondary mb-4">Наши специалисты готовы ответить на все ваши вопросы и помочь выбрать оптимальное решение</p>
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <a href="{{ url_for('main.contacts') }}" class="btn btn-primary btn-lg">
+                                <i class="bi bi-telephone me-2"></i>Связаться с нами
+                            </a>
+                            <button class="btn btn-outline-primary btn-lg">
+                                <i class="bi bi-chat-dots me-2"></i>Онлайн-консультация
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

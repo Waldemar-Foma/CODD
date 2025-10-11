@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h1 class="display-5 fw-bold mb-4 animated fadeInUp">
+                    Новости и события
+                </h1>
+                <p class="lead mb-5 animated fadeInUp opacity-75" style="animation-delay: 0.2s;">
+                    Будьте в курсе последних событий в сфере дорожного движения<br>
+                    и наших текущих проектов
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="fw-bold mb-4">Последние новости</h2>
+                <p class="text-secondary">Актуальная информация о нашей работе и дорожной обстановке</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% set news = [
+                {'date': '15.12.2024', 'title': 'Обновление светофоров на центральных улицах', 'excerpt': 'Завершена установка современных светофорных объектов на основных магистралях города'},
+                {'date': '10.12.2024', 'title': 'Новые пешеходные переходы возле школ', 'excerpt': 'Обустроены безопасные переходы для школьников в рамках программы безопасности'},
+                {'date': '05.12.2024', 'title': 'Сезонное обслуживание дорожной инфраструктуры', 'excerpt': 'Подготовка к зимнему сезону завершена, все системы готовы к работе'},
+                {'date': '28.11.2024', 'title': 'Внедрение системы умного паркинга', 'excerpt': 'Запуск новой системы мониторинга парковочных мест в центре города'},
+                {'date': '20.11.2024', 'title': 'Реконструкция дорожного покрытия', 'excerpt': 'Начаты работы по обновлению асфальтового покрытия на основных улицах'},
+                {'date': '15.11.2024', 'title': 'Обновление дорожной разметки', 'excerpt': 'Завершены работы по нанесению новой разметки на ключевых магистралях'}
+            ] %}
+            
+            {% for item in news %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card news-card h-100">
+                    <div class="card-body">
+                        <div class="news-date mb-3">
+                            <i class="bi bi-calendar me-2"></i>{{ item.date }}
+                        </div>
+                        <h5 class="card-title">{{ item.title }}</h5>
+                        <p class="card-text text-secondary">{{ item.excerpt }}</p>
+                        <a href="#" class="btn btn-outline-primary">Читать далее</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-lg-10 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Архив новостей</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Обновление светофоров на центральных улицах</h6>
+                                    <p class="mb-1 text-secondary">Завершена установка современных светофорных объектов</p>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">05.12.2024</span>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Новые пешеходные переходы возле школ</h6>
+                                    <p class="mb-1 text-secondary">Обустроены безопасные переходы для школьников</p>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">28.11.2024</span>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Сезонное обслуживание дорожной инфраструктуры</h6>
+                                    <p class="mb-1 text-secondary">Подготовка к зимнему сезону завершена</p>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">15.11.2024</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-lg-6 mx-auto">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center p-4">
+                        <h4 class="mb-3">Подпишитесь на новости</h4>
+                        <p class="mb-4">Получайте самые свежие новости о дорожной ситуации на email</p>
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Ваш email">
+                            <button class="btn btn-light">Подписаться</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

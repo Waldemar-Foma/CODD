@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доступ запрещен — СмолЦОДД</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #62a744;
+            --primary-green-light: #7bbf5d;
+            --primary-green-dark: #4e8a36;
+            --error: #ef4444;
+            --error-light: #fca5a5;
+            --error-dark: #dc2626;
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+            --radius-lg: 16px;
+            --transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        .error-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .error-content {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 4rem 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .error-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--error), var(--error-light));
+        }
+
+        .error-icon {
+            font-size: 8rem;
+            color: var(--error);
+            margin-bottom: 2rem;
+            animation: shake 2s infinite;
+        }
+
+        .error-code {
+            font-size: 6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--error), var(--error-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .error-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 1rem;
+        }
+
+        .error-description {
+            font-size: 1.25rem;
+            color: var(--gray-600);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .error-details {
+            background: var(--gray-50);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .error-details h4 {
+            color: var(--gray-700);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .error-details ul {
+            margin-bottom: 0;
+            padding-left: 1.5rem;
+        }
+
+        .error-details li {
+            margin-bottom: 0.5rem;
+            color: var(--gray-600);
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .btn-error {
+            padding: 0.875rem 2rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 2px solid transparent;
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: var(--white);
+            border-color: var(--error);
+        }
+
+        .btn-danger:hover {
+            background: var(--error-dark);
+            border-color: var(--error-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-primary {
+            background: var(--primary-green);
+            color: var(--white);
+            border-color: var(--primary-green);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-green-dark);
+            border-color: var(--primary-green-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--error);
+            border-color: var(--error);
+        }
+
+        .btn-outline:hover {
+            background: var(--error);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .auth-options {
+            background: var(--gray-50);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .auth-options h3 {
+            color: var(--gray-700);
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+        }
+
+        .auth-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .auth-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--white);
+            border-radius: var(--radius);
+            text-decoration: none;
+            color: var(--gray-700);
+            transition: all var(--transition);
+            border: 1px solid var(--gray-200);
+            text-align: left;
+        }
+
+        .auth-btn:hover {
+            color: var(--primary-green);
+            border-color: var(--primary-green);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-btn i {
+            color: var(--primary-green);
+            font-size: 1.5rem;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-5px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(5px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .error-container {
+                padding: 1rem;
+            }
+
+            .error-content {
+                padding: 3rem 2rem;
+            }
+
+            .error-icon {
+                font-size: 6rem;
+            }
+
+            .error-code {
+                font-size: 4rem;
+            }
+
+            .error-title {
+                font-size: 2rem;
+            }
+
+            .error-description {
+                font-size: 1.125rem;
+            }
+
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-error {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            .auth-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .error-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .error-icon {
+                font-size: 4rem;
+            }
+
+            .error-code {
+                font-size: 3rem;
+            }
+
+            .error-title {
+                font-size: 1.75rem;
+            }
+
+            .error-description {
+                font-size: 1rem;
+            }
+
+            .error-details {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-content">
+            <i class="bi bi-shield-lock error-icon"></i>
+            
+            <h1 class="error-code">403</h1>
+            <h2 class="error-title">Доступ запрещен</h2>
+            
+            <p class="error-description">
+                У вас недостаточно прав для доступа к этой странице. 
+                Возможно, требуется авторизация или у вашей учетной записи нет необходимых привилегий.
+            </p>
+
+            <div class="error-details">
+                <h4>Возможные причины:</h4>
+                <ul>
+                    <li>Вы не авторизованы в системе</li>
+                    <li>Ваша учетная запись не имеет доступа к этому разделу</li>
+                    <li>Страница доступна только для определенных групп пользователей</li>
+                    <li>Истек срок действия вашей сессии</li>
+                </ul>
+            </div>
+
+            <div class="error-actions">
+                <a href="/auth/login" class="btn-error btn-danger">
+                    <i class="bi bi-box-arrow-in-right"></i>Войти в систему
+                </a>
+                <a href="/" class="btn-error btn-primary">
+                    <i class="bi bi-house"></i>На главную
+                </a>
+                <button onclick="history.back()" class="btn-error btn-outline">
+                    <i class="bi bi-arrow-left"></i>Вернуться назад
+                </button>
+            </div>
+
+            <div class="auth-options">
+                <h3>Варианты доступа:</h3>
+                <div class="auth-buttons">
+                    <a href="/auth/register" class="auth-btn">
+                        <i class="bi bi-person-plus"></i>
+                        <div>
+                            <strong>Регистрация</strong>
+                            <small>Создать новую учетную запись</small>
+                        </div>
+                    </a>
+                    <a href="/auth/login" class="auth-btn">
+                        <i class="bi bi-key"></i>
+                        <div>
+                            <strong>Вход</strong>
+                            <small>Войти в существующий аккаунт</small>
+                        </div>
+                    </a>
+                    <a href="/contacts" class="auth-btn">
+                        <i class="bi bi-question-circle"></i>
+                        <div>
+                            <strong>Помощь</strong>
+                            <small>Связаться с поддержкой</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Добавляем анимацию при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.error-icon, .error-code, .error-title, .error-description');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    el.style.transition = 'all 0.6s ease';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+
+            // Проверяем, авторизован ли пользователь
+            try {
+                const token = localStorage.getItem('auth_token');
+                if (token) {
+                    document.querySelector('.error-description').innerHTML += 
+                        '<br><small class="text-muted">Вы авторизованы, но недостаточно прав.</small>';
+                }
+            } catch (e) {
+                // Игнорируем ошибки localStorage
+            }
+        });
+
+        // Обработка кнопки "Назад"
+        function goBack() {
+            if (document.referrer && document.referrer.includes(window.location.host)) {
+                history.back();
+            } else {
+                window.location.href = '/';
+            }
+        }
+
+        // Обновляем обработчик кнопки "Назад"
+        document.querySelector('button[onclick="history.back()"]').onclick = goBack;
+
+        // Автоматический редирект на страницу входа через 10 секунд
+        setTimeout(() => {
+            const loginBtn = document.querySelector('.btn-danger');
+            if (loginBtn && !window.location.href.includes('auth')) {
+                loginBtn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Войти (авторедирект)';
+                loginBtn.style.background = 'var(--primary-green)';
+                loginBtn.style.borderColor = 'var(--primary-green)';
+                
+                setTimeout(() => {
+                    window.location.href = '/auth/login';
+                }, 2000);
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
